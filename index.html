@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 16px;
+      color: #333;
+    }
+    .container {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      max-width: 580px;
+      margin: 0 auto;
+    }
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #f1f3f4;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+    h2 {
+      font-size: 16px;
+      color: #1a73e8;
+      margin: 0;
+    }
+    .btn-close {
+      background: #ea4335;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 12px;
+    }
+    .filters-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 2fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #5f6368;
+      text-transform: uppercase;
+    }
+    select, input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #dadce0;
+      border-radius: 6px;
+      font-size: 13px;
+      background-color: #fff;
+      box-sizing: border-box;
+    }
+    select:focus, input:focus {
+      border-color: #1a73e8;
+      outline: none;
+    }
+    .btn-buscar {
+      width: 100%;
+      background-color: #34a853;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 16px;
+      transition: background 0.2s;
+    }
+    .btn-buscar:hover { background-color: #2e8b57; }
+    
+    .carousel-card {
+      background: #f8f9fa;
+      border: 1px solid #e8eaed;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      display: none; /* Escondido até clicar em buscar */
+    }
+    .carousel-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .counter-badge {
+      background: #e8f0fe;
+      color: #1a73e8;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+    .server-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #202124;
+      margin: 6px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #loading {
+      display: none;
+      font-size: 12px;
+      color: #1a73e8;
+      font-weight: 500;
+      margin: 10px 0;
+    }
+    .nav-controls {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      box-sizing: border-box;
+      transition: background 0.2s;
+    }
+    .btn-secondary { background-color: #dadce0; color: #3c4043; }
+    .btn-secondary:hover { background-color: #bdc1c6; }
+    .btn-primary { background-color: #1a73e8; color: white; }
+    .btn-primary:hover { background-color: #1557b0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-bar">
+      <h2>Módulo FFI - Carrossel Blindado</h2>
+      <button class="btn-close" onclick="fecharElimpar()">✕ Sair</button>
+    </div>
+
+    <!-- SELETORES SEM GATILHO AUTOMÁTICO -->
+    <div class="filters-grid">
+      <div>
+        <label for="mes">Mês:</label>
+        <select id="mes">
+          <option value="1">Jan</option>
+          <option value="2">Fev</option>
+          <option value="3">Mar</option>
+          <option value="4">Abr</option>
+          <option value="5">Mai</option>
+          <option value="6">Jun</option>
+          <option value="7">Jul</option>
+          <option value="8">Ago</option>
+          <option value="9">Set</option>
+          <option value="10">Out</option>
+          <option value="11">Nov</option>
+          <option value="12">Dez</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="ano">Ano:</label>
+        <input type="number" id="ano" value="2026">
+      </div>
+
+      <div>
+        <label for="divisao">Divisão:</label>
+        <select id="divisao">
+          <option value="">Carregando...</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- BOTÃO MANUAL DE BUSCA -->
+    <button class="btn-buscar" onclick="buscarServidores()">🔍 Carregar Servidores da Divisão</button>
+
+    <!-- ÁREA DO CARROSSEL -->
+    <div class="carousel-card" id="cardCarrossel">
+      <div class="carousel-info">
+        <span class="counter-badge">Ficha <span id="lblAtual">0</span> de <span id="lblTotal">0</span></span>
+        <span id="lblStatus" style="font-size: 11px; color: #70757a;">Pronto</span>
+      </div>
+
+      <div class="server-name" id="lblNomeServidor">-</div>
+      <div id="loading">⏳ Processando ficha...</div>
+
+      <div class="nav-controls">
+        <button class="btn btn-secondary" onclick="mudarServidor(-1)">⬅ Anterior</button>
+        <a id="btnImprimir" href="#" target="_blank" class="btn btn-primary">🖨️ Imprimir Esta</a>
+        <button class="btn btn-secondary" onclick="mudarServidor(1)">Próxima ➡</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var indiceAtual = 0;
+    var listaServidores = [];
+
+    window.onload = function() {
+      google.script.run.withSuccessHandler(function(data) {
+        var selDiv = document.getElementById('divisao');
+        selDiv.innerHTML = '';
+        
+        var optTodas = document.createElement('option');
+        optTodas.value = "Todas";
+        optTodas.textContent = "Todas as Divisões";
+        selDiv.appendChild(optTodas);
+
+        data.divisoes.forEach(function(d) {
+          if (d !== "Todas") {
+            var opt = document.createElement('option');
+            opt.value = d;
+            opt.textContent = d;
+            selDiv.appendChild(opt);
+          }
+        });
+
+        document.getElementById('ano').value = data.ano;
+        document.getElementById('mes').value = data.mes;
+      }).obterDadosIniciais();
+    };
+
+    function buscarServidores() {
+      var formData = {
+        divisao: document.getElementById('divisao').value,
+        mes: document.getElementById('mes').value,
+        ano: document.getElementById('ano').value
+      };
+
+      document.getElementById('cardCarrossel').style.display = 'block';
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('lblNomeServidor').innerText = "Buscando lista...";
+      document.getElementById('btnImprimir').style.display = 'none';
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          listaServidores = (res && res.servidores) ? res.servidores : [];
+          indiceAtual = 0;
+          document.getElementById('lblTotal').innerText = listaServidores.length;
+          
+          if (listaServidores.length > 0) {
+            carregarServidorAtual();
+          } else {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('lblAtual').innerText = 0;
+            document.getElementById('lblNomeServidor').innerText = "Nenhum servidor encontrado nesta divisão.";
+          }
+        })
+
+        .withFailureHandler(function(err) {
+          document.getElementById('loading').style.display = 'none';
+          alert("Erro ao buscar servidores: " + err.message);
+        })
+        .obterListaServidoresCarrossel(formData);
+    }
+
+    function mudarServidor(direcao) {
+      if (listaServidores.length === 0) return;
+      var novoIndice = indiceAtual + direcao;
+      if (novoIndice < 0 || novoIndice >= listaServidores.length) return;
+      
+      indiceAtual = novoIndice;
+      carregarServidorAtual();
+    }
+
+    function carregarServidorAtual() {
+      var formData = {
+        divisao: document.getElementById('divisao').value,
+        mes: document.getElementById('mes').value,
+        ano: document.getElementById('ano').value
+      };
+
+      var servAtual = listaServidores[indiceAtual];
+      var nomeServ = Array.isArray(servAtual) ? servAtual[0] : servAtual;
+
+      document.getElementById('lblAtual').innerText = indiceAtual + 1;
+      document.getElementById('lblNomeServidor').innerText = nomeServ;
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('btnImprimir').style.display = 'none';
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          document.getElementById('loading').style.display = 'none';
+          if (res && res.urlPdf) {
+            var btnPrint = document.getElementById('btnImprimir');
+            btnPrint.href = res.urlPdf;
+            btnPrint.style.display = 'block';
+          }
+        })
+        .withFailureHandler(function(err) {
+          document.getElementById('loading').style.display = 'none';
+          alert("Erro ao gerar PDF: " + err.message);
+        })
+        .gerarPdfCarrossel(formData, indiceAtual);
+    }
+
+    function fecharElimpar() {
+      google.script.run.limpa_form();
+      try { google.script.host.close(); } catch(e) {}
+    }
+  </script>
+</body>
+</html>
